@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mohamed & Romisaa</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React & ReactDOM (UMD) -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;700&family=Great+Vibes&display=swap"
+        rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Tajawal', 'sans-serif'],
+                        script: ['Great Vibes', 'cursive'],
+                    },
+                    colors: {
+                        rose: {
+                            50: '#fff1f2',
+                            100: '#ffe4e6',
+                            200: '#fecdd3',
+                            300: '#fda4af',
+                            400: '#fb7185',
+                            500: '#f43f5e',
+                            600: '#e11d48',
+                            700: '#be123c',
+                            800: '#9f1239',
+                            900: '#881337',
+                        }
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 1s ease-in forwards;
+            opacity: 0;
+        }
+
+        .animate-slide-up {
+            animation: slideUp 0.8s ease-out forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #ffe4e6;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #fb7185;
+            border-radius: 4px;
+        }
+
+        /* 3D Carousel */
+        .carousel-container {
+            perspective: 1000px;
+            overflow: visible;
+        }
+
+        .carousel {
+            width: 100%;
+            height: 400px;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: spin 20s infinite linear;
+        }
+
+        .carousel:hover {
+            animation-play-state: paused;
+        }
+
+        .carousel-item {
+            position: absolute;
+            width: 200px;
+            height: 300px;
+            left: 50%;
+            top: 50%;
+            transform-origin: center;
+            transform: translate(-50%, -50%) rotateY(var(--i)) translateZ(350px);
+            transition: transform 0.5s, box-shadow 0.5s;
+            -webkit-box-reflect: below 10px linear-gradient(transparent, transparent, #0005);
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotateY(0deg);
+            }
+
+            to {
+                transform: rotateY(360deg);
+            }
+        }
+
+        /* Particles */
+        .particle {
+            position: fixed;
+            pointer-events: none;
+            animation: burst 1s ease-out forwards;
+            z-index: 9999;
+        }
+
+        @keyframes burst {
+            0% {
+                transform: translate(0, 0) scale(1);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translate(var(--tx), var(--ty)) scale(0);
+                opacity: 0;
+            }
+        }
+
+        /* Cursor Trail */
+        .trail-heart {
+            position: fixed;
+            pointer-events: none;
+            font-size: 20px;
+            animation: fadeUp 1s ease-out forwards;
+            z-index: 9999;
+        }
+
+        @keyframes fadeUp {
+            0% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 0.8;
+            }
+
+            100% {
+                transform: translate(-50%, -150%) scale(0.5);
+                opacity: 0;
+            }
+        }
+
+        /* Camera Viewfinder Overlay */
+        .camera-overlay {
+            pointer-events: none;
+            position: absolute;
+            inset: 0;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            z-index: 50;
+        }
+
+        .rec-dot {
+            width: 12px;
+            height: 12px;
+            background-color: red;
+            border-radius: 50%;
+            animation: pulse-slow 1s infinite;
+        }
+
+        .corner-tl,
+        .corner-tr,
+        .corner-bl,
+        .corner-br {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border: 4px solid white;
+        }
+
+        .corner-tl {
+            top: 20px;
+            left: 20px;
+            border-right: none;
+            border-bottom: none;
+        }
+
+        .corner-tr {
+            top: 20px;
+            right: 20px;
+            border-left: none;
+            border-bottom: none;
+        }
+
+        .corner-bl {
+            bottom: 20px;
+            left: 20px;
+            border-right: none;
+            border-top: none;
+        }
+
+        .corner-br {
+            bottom: 20px;
+            right: 20px;
+            border-left: none;
+            border-top: none;
+        }
+
+        /* Film Strip Style for Carousel Items */
+        .film-border {
+            background-color: #111;
+            padding: 15px 5px;
+            /* Vertical padding simulates film sprockets */
+            border-radius: 4px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .film-border::before,
+        .film-border::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 10px;
+            background-image: linear-gradient(to right, white 50%, transparent 50%);
+            background-size: 20px 100%;
+            opacity: 0.3;
+        }
+
+        .film-border::before {
+            top: 5px;
+        }
+
+        .film-border::after {
+            bottom: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // --- Icons ---
+        const Heart = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className}>
+                <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" />
+            </svg>
+        );
+
+        const Lock = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className}>
+                <path fillRule="evenodd" d="M12 1.5a5.25 5.25 0 00-5.25 5.25v3a3 3 0 00-3 3v6.75a3 3 0 003 3h10.5a3 3 0 003-3v-6.75a3 3 0 00-3-3v-3c0-2.9-2.35-5.25-5.25-5.25zm3.75 8.25v-3a3.75 3.75 0 10-7.5 0v3h7.5z" clipRule="evenodd" />
+            </svg>
+        );
+
+        // Particle System Hook
+        function useParticleSystem() {
+            useEffect(() => {
+                const handleClick = (e) => {
+                    const colors = ['#dc2626', '#db2777', '#7c3aed', '#ec4899', '#f472b6'];
+                    for (let i = 0; i < 15; i++) {
+                        const particle = document.createElement('div');
+                        particle.classList.add('particle');
+                        particle.innerHTML = '❤️';
+                        particle.style.left = e.clientX + 'px';
+                        particle.style.top = e.clientY + 'px';
+                        particle.style.color = colors[Math.floor(Math.random() * colors.length)];
+                        particle.style.fontSize = Math.random() * 20 + 10 + 'px';
+                        particle.style.setProperty('--tx', (Math.random() - 0.5) * 200 + 'px');
+                        particle.style.setProperty('--ty', (Math.random() - 0.5) * 200 + 'px');
+                        document.body.appendChild(particle);
+                        setTimeout(() => particle.remove(), 1000);
+                    }
+                };
+
+                const handleMove = (e) => {
+                    if (Math.random() > 0.85) {
+                        const heart = document.createElement('div');
+                        heart.classList.add('trail-heart');
+                        heart.innerHTML = '✨';
+                        heart.style.left = e.clientX + 'px';
+                        heart.style.top = e.clientY + 'px';
+                        document.body.appendChild(heart);
+                        setTimeout(() => heart.remove(), 1000);
+                    }
+                };
+
+                window.addEventListener('click', handleClick);
+                window.addEventListener('mousemove', handleMove);
+                return () => {
+                    window.removeEventListener('click', handleClick);
+                    window.removeEventListener('mousemove', handleMove);
+                }
+            }, []);
+        }
+
+        // --- Main Component ---
+        function LoveWebsite() {
+            useParticleSystem();
+
+            // simple Parallax Hook logic inline
+            useEffect(() => {
+                const handleScroll = () => {
+                    const images = document.querySelectorAll('.parallax-img');
+                    images.forEach(img => {
+                        const speed = 0.5;
+                        const rect = img.parentElement.getBoundingClientRect();
+                        const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
+                        if (isVisible) {
+                            const offset = (window.innerHeight - rect.top) * speed * 0.1;
+                            img.style.transform = `translateY(${offset - 30}px)`;
+                        }
+                    });
+                };
+                window.addEventListener('scroll', handleScroll);
+                return () => window.removeEventListener('scroll', handleScroll);
+            }, []);
+
+            const [isLogged, setIsLogged] = useState(false);
+            const [day, setDay] = useState("");
+            const [month, setMonth] = useState("");
+            const [year, setYear] = useState("");
+            const [showLetter, setShowLetter] = useState(false);
+            const [showSpecialMessage, setShowSpecialMessage] = useState(false);
+            const [showSecondLetter, setShowSecondLetter] = useState(false);
+            const [showSecret, setShowSecret] = useState(false);
+            const [showFinalScene, setShowFinalScene] = useState(false);
+            const [isSeaMessageOpen, setIsSeaMessageOpen] = useState(false);
+            const [timeSinceFirstSight, setTimeSinceFirstSight] = useState({});
+            const [timeSinceFirstLove, setTimeSinceFirstLove] = useState({});
+            const [timeSince2016, setTimeSince2016] = useState({});
+            const [isPlaying, setIsPlaying] = useState(false);
+            const [selectedImage, setSelectedImage] = useState(null);
+            const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+            const audioRef = useRef(null);
+
+            // Dates
+            const firstSightDate = new Date("2025-08-25T00:00:00");
+
+            const calculateTimeDiff = (startDate) => {
+                const now = new Date();
+                const diff = now - startDate;
+
+                const totalSeconds = Math.floor(diff / 1000);
+                const totalMinutes = Math.floor(totalSeconds / 60);
+                const totalHours = Math.floor(totalMinutes / 60);
+                const totalDays = Math.floor(totalHours / 24);
+
+                const years = Math.floor(totalDays / 365);
+                const months = Math.floor((totalDays % 365) / 30);
+                const days = totalDays % 30;
+
+                const hours = totalHours % 24;
+                const minutes = totalMinutes % 60;
+                const seconds = totalSeconds % 60;
+
+                return { years, months, days, hours, minutes, seconds };
+            };
+
+            useEffect(() => {
+                const interval = setInterval(() => {
+                    setTimeSinceFirstSight(calculateTimeDiff(firstSightDate));
+                }, 1000);
+                return () => clearInterval(interval);
+            }, []);
+
+            const handleLogin = () => {
+                if (year === "2025") {
+                    setIsLogged(true);
+                    // Try to play audio immediately on user interaction
+                    if (audioRef.current) {
+                        const playPromise = audioRef.current.play();
+                        if (playPromise !== undefined) {
+                            playPromise
+                                .then(() => setIsPlaying(true))
+                                .catch(error => console.log("Audio playback failed:", error));
+                        }
+                    }
+                    setTimeout(() => setShowLetter(true), 1200);
+                } else {
+                    alert("غلط ي روحي");
+                }
+            };
+
+            const toggleAudio = () => {
+                if (isPlaying) {
+                    audioRef.current.pause();
+                } else {
+                    audioRef.current.play();
+                }
+                setIsPlaying(!isPlaying);
+            };
+
+            return (
+                <div className="bg-gray-900 min-h-screen font-sans text-gray-100 overflow-x-hidden relative">
+                    {/* Global Night Sky Background - Always Visible */}
+                    <div className="fixed inset-0 pointer-events-none">
+                        {[...Array(50)].map((_, i) => (
+                            <div key={i} className="absolute bg-white rounded-full animate-pulse"
+                                style={{
+                                    width: Math.random() * 2 + 'px',
+                                    height: Math.random() * 2 + 'px',
+                                    top: Math.random() * 100 + '%',
+                                    left: Math.random() * 100 + '%',
+                                    opacity: Math.random() * 0.5 + 0.1,
+                                    animationDuration: Math.random() * 5 + 3 + 's'
+                                }}></div>
+                        ))}
+                    </div>
+
+                    {/* Audio Player - Always Mounted */}
+                    <audio ref={audioRef} loop>
+                        <source src="./romantic_song.mp4" type="audio/mp4" />
+                    </audio>
+
+                    {/* Audio Toggle Button - Always Visible */}
+                    <button onClick={toggleAudio} className={`fixed top-4 left-4 z-50 p-3 rounded-full shadow-lg transition-all duration-300 ${isPlaying ? 'bg-pink-500 text-white animate-spin' : 'bg-white text-pink-500 hover:bg-gray-100'}`}>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M9 18V5l12-2v13"></path>
+                            <circle cx="6" cy="18" r="3"></circle>
+                            <circle cx="18" cy="16" r="3"></circle>
+                        </svg>
+                    </button>
+
+                    {!isLogged ? (
+                        <div className="min-h-screen flex items-center justify-center relative overflow-hidden font-sans z-20">
+                            {/* Login Card */}
+                            <div className="relative z-10 bg-white/10 backdrop-blur-xl p-8 md:p-12 rounded-[2rem] text-center shadow-2xl max-w-sm w-full mx-4 border border-white/20">
+
+
+                                <h1 className="text-3xl font-bold mb-8 text-white drop-shadow-md">بوابة حبنا ❤️</h1>
+
+                                <div className="flex gap-3 justify-center mb-8" dir="ltr">
+                                    <input type="password" placeholder="كلمة السر" value={year} onChange={(e) => setYear(e.target.value)}
+                                        className="w-full p-4 rounded-2xl border border-white/30 bg-white/20 focus:border-pink-500 focus:bg-white/30 focus:outline-none text-center text-xl text-white shadow-inner transition-all placeholder-white/50" />
+                                </div>
+
+                                <button onClick={handleLogin}
+                                    className="w-full bg-gradient-to-r from-pink-600 to-purple-600 text-white font-bold py-4 rounded-2xl shadow-lg hover:shadow-pink-500/30 hover:-translate-y-1 transition-all duration-300">
+                                    فتح القلب 🔓
+                                </button>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="relative z-10">
+                            {/* Sticky Navigation */}
+                            <nav className="fixed top-0 left-0 right-0 z-40 bg-black/30 backdrop-blur-md border-b border-white/10 px-6 py-4 flex justify-between items-center">
+                                <div className="text-2xl font-bold font-script text-pink-500">M & R</div>
+                                <div className="flex gap-6 text-sm md:text-base">
+                                    <a href="#timeline" className="hover:text-pink-400 transition-colors">ذكرياتنا</a>
+                                    <a href="#video" className="hover:text-pink-400 transition-colors">الفيديو</a>
+                                    <a href="#reasons" className="hover:text-pink-400 transition-colors">ليه بحبك</a>
+                                    <a href="#gallery" className="hover:text-pink-400 transition-colors">صورنا</a>
+                                </div>
+                            </nav>
+
+                            {/* Audio Player */}
+
+
+
+                            {/* Popups */}
+                            {showSecret && (
+                                <div className="fixed inset-0 flex items-center justify-center bg-black/60 z-50 animate-fade-in backdrop-blur-sm" onClick={() => setShowSecret(false)}>
+                                    <div className="bg-white px-16 py-12 rounded-[2rem] text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-violet-600 shadow-2xl transform scale-105 transition-transform text-center mx-4">
+                                        بحبك ❤
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Image Lightbox */}
+                            {selectedImage && (
+                                <div className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-md flex items-center justify-center animate-fade-in p-4" onClick={() => setSelectedImage(null)}>
+                                    <button className="absolute top-6 right-6 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-full p-2 transition-all">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                    </button>
+                                    <img src={selectedImage} alt="Full View" className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl border-2 border-white/20 animate-scale-up" onClick={(e) => e.stopPropagation()} />
+                                </div>
+                            )}
+
+                            {/* Love Letter Modal Part 1 */}
+                            {showLetter && (
+                                <div className="fixed inset-0 flex items-center justify-center bg-black/70 z-50 animate-fade-in backdrop-blur-md p-4">
+                                    <div className="bg-white/90 rounded-[2rem] shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col relative border border-pink-200">
+                                        <div className="overflow-y-auto p-8 md:p-12 custom-scrollbar">
+                                            <div className="text-center mb-8">
+                                                <Heart className="w-16 h-16 text-pink-500 mx-auto animate-float mb-4" />
+                                                <h2 className="text-3xl font-bold text-gray-800 font-sans">قلبي يا محمد ❤️</h2>
+                                            </div>
+
+                                            <div className="text-lg md:text-xl leading-loose text-gray-700 font-medium space-y-6 text-right" style={{ direction: 'rtl' }}>
+                                                <p>
+                                                    عامل ايه يا محمد أنا حبيبتك روميثاء عايزة اقولك كلام من قلبي.. من الآخر حبيت اقولك في اليوم ده بالذات اني مكنتش اتخيل في يوم اننا نكون مع بعض ونحب بعض الحب ده كله. انت خلتني انسانة تانية، عرفت معاك معنى الحب الحقيقي والوفاء والدفا. بقيت احبك كل ثانية اكتر من اللي قبلها وبقيت انت اساس حياتي اللي بعمل كل حاجة عشانه. عايزة اوصل لاي حاجة عشانك وانت واقف في ضهري ومعايا طول الوقت ومصدقني. انت الشخص الوحيد اللي وقف جمبي بجد في الوحش قبل الحلو من غير مقابل. بحبك قوي ومقدرش اعيش لحظة من غيرك، انت روحي وحبيبي وجوزي وابويا واخويا وصاحبي وكل دنيتي. انا اسفة على اي حاجة ضايقتك، او اي موقف زعلتك فيه، مش قصدي ازعلك ابدا والله. مقدرش استغني عنك لو حصل ايه. دي اول ڤلانيتاين لينا مع بعض وداخلين الڤلانيتاين الجديد سوا، وان شاء الله طول العمر مع بعض. ربنا يخليك ليا يا روحي وميحرمنيش منك ابدا ولا من اني اشوفك قدامي وابص في عيونك اللي بحبها. انت اول حد يدخل قلبي بالطريقة دي واول حد اقوله الكلام ده. ربنا يخليك ليا يا روح قلبي يا محمد يا اطيب قلب في الدنيا. بحوووووبببكككك يا كل دنيتي ❤️🌎💍
+                                                </p>
+                                            </div>
+                                            <div className="text-center mt-8">
+                                                <button onClick={() => setShowLetter(false)} className="bg-gradient-to-r from-pink-500 to-rose-600 text-white px-8 py-3 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 font-bold">
+                                                    بحبك يا محمد ❤️
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {showFinalScene && <FinalSceneComponent onClose={() => setShowFinalScene(false)} />}
+
+                            {/* Content */}
+                            <div className="relative">
+                                {/* Hero Section */}
+                                <section className="min-h-screen flex flex-col items-center justify-center text-center p-4 relative overflow-hidden">
+                                    <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-rose-200/50 to-transparent -z-10"></div>
+
+                                    <Heart className="w-24 h-24 text-pink-500 mb-6 animate-float" />
+                                    <h1 className="text-7xl md:text-9xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-rose-600 drop-shadow-sm font-script pb-4">
+                                        Mohamed & Romisaa
+                                    </h1>
+                                    <h2 className="text-4xl md:text-6xl font-bold text-gray-800 mb-6 font-sans">محمد ❤ روميثاء</h2>
+                                    <p className="text-2xl md:text-3xl text-gray-600 mb-10 font-light">قصة حب مكتوبة للابد</p>
+
+                                    <button onClick={() => { setShowSecret(true); setTimeout(() => setShowSecret(false), 2000); }}
+                                        className="group relative overflow-hidden bg-white text-pink-600 px-10 py-4 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 font-bold text-lg border border-pink-100">
+                                        <span className="relative z-10 transition-colors group-hover:text-white">زر المفاجأة ✨</span>
+                                        <div className="absolute inset-0 bg-gradient-to-r from-pink-500 to-rose-500 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></div>
+                                    </button>
+
+                                    <div className="absolute bottom-10 animate-bounce text-pink-400">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7 13l5 5 5-5M7 6l5 5 5-5" /></svg>
+                                    </div>
+                                </section>
+                            </div>
+
+
+
+
+                            {/* Love Meter Section */}
+                            <section className="py-20 px-4 text-center relative z-10">
+                                <h2 className="text-4xl font-bold mb-10 text-pink-500">مقياس حبي ليكي</h2>
+                                <div className="max-w-2xl mx-auto bg-white/5 backdrop-blur-lg p-8 rounded-3xl shadow-xl border border-white/10 cursor-pointer group transition-all hover:bg-white/10"
+                                    onClick={(e) => {
+                                        if (e.currentTarget.classList.contains('calculating')) return;
+                                        e.currentTarget.classList.add('calculating');
+
+                                        const progressBar = e.currentTarget.querySelector('.progress-bar');
+                                        const heart = e.currentTarget.querySelector('.meter-heart');
+                                        const text = e.currentTarget.querySelector('.status-text');
+
+                                        text.innerText = "جاري حساب كمية الحب...";
+                                        progressBar.style.width = "0%";
+                                        progressBar.style.transition = "width 3s ease-in-out";
+
+                                        // Animate Progress
+                                        requestAnimationFrame(() => {
+                                            progressBar.style.width = "100%";
+                                        });
+
+                                        // Heart Beat Faster
+                                        heart.style.animationDuration = "0.5s";
+
+                                        setTimeout(() => {
+                                            text.innerText = "النتيجة: حب لا نهائي! ♾️❤️";
+                                            text.classList.add("text-3xl", "font-bold", "text-pink-500");
+                                            heart.style.transform = "scale(1.5)";
+                                            heart.style.animationDuration = "1s";
+
+                                            // Confetti Effect (Simple manual particles)
+                                            for (let k = 0; k < 20; k++) {
+                                                const p = document.createElement('div');
+                                                p.innerHTML = '🎉';
+                                                p.style.position = 'absolute';
+                                                p.style.left = '50%';
+                                                p.style.top = '50%';
+                                                p.style.fontSize = '20px';
+                                                p.style.transform = `translate(${(Math.random() - 0.5) * 200}px, ${(Math.random() - 0.5) * 200}px)`;
+                                                p.style.transition = 'all 1s ease-out';
+                                                p.style.opacity = '1';
+                                                e.currentTarget.appendChild(p);
+                                                setTimeout(() => { p.style.opacity = '0'; }, 500);
+                                                setTimeout(() => p.remove(), 1000);
+                                            }
+
+                                            e.currentTarget.classList.remove('calculating');
+                                        }, 3000);
+                                    }}>
+                                    <div className="relative pt-1">
+                                        <div className="flex mb-2 items-center justify-between">
+                                            <div>
+                                                <span className="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-pink-200 bg-pink-900/50">
+                                                    نسبة الحب
+                                                </span>
+                                            </div>
+                                            <div className="text-right">
+                                                <span className="text-xs font-semibold inline-block text-pink-300">
+                                                    ∞ %
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div className="overflow-hidden h-6 mb-4 text-xs flex rounded bg-gray-700 shadow-inner">
+                                            <div style={{ width: "10%" }} className="progress-bar shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-gradient-to-r from-pink-600 via-rose-500 to-purple-600 animate-pulse-slow transition-all duration-300"></div>
+                                        </div>
+                                        <div className="flex justify-center mt-4">
+                                            <Heart className="meter-heart w-32 h-32 text-pink-600 animate-pulse drop-shadow-[0_0_15px_rgba(236,72,153,0.5)] transition-transform duration-200" />
+                                        </div>
+                                        <p className="status-text mt-4 text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-300 to-purple-300">
+                                            اضغط عشان تشوف النتيجة...
+                                        </p>
+                                    </div>
+                                </div>
+                            </section>
+
+
+
+
+                            {/* Timeline */}
+                            <section id="timeline" className="py-32 px-4 relative z-10">
+                                <h2 className="text-5xl font-bold text-center mb-20 text-white drop-shadow-md">خط ذكرياتنا</h2>
+                                <div className="max-w-4xl mx-auto relative">
+                                    <div className="absolute left-1/2 top-0 bottom-0 w-1 bg-gradient-to-b from-pink-600 to-purple-600 transform -translate-x-1/2 rounded-full"></div>
+                                    {[
+                                        { text: "أجمل صدفة 💖", date: "بداية الحكاية", img: "mem1.jpg", desc: "اليوم اللي شفتك فيه كان بداية عمري الجديد. نظرة منك خطفت قلبي." },
+                                        { text: "عيونك حياة 🌍", date: "نور عيني", img: "mem2.jpg", desc: "لما بتضحكي، الدنيا كلها بتضحكلي. ربنا يديمك نعمة في حياتي." },
+                                        { text: "رفيقه الدرب 💑", date: "أماني", img: "mem3.jpg", desc: "في وجودك لقيت وطني. انتي الأمان والسند الحقيقي." },
+                                    ].map((item, i) => (
+                                        <div key={i} className={`flex items-center justify-between mb-16 w-full ${i % 2 === 0 ? 'flex-row-reverse' : ''}`}>
+                                            <div className="w-5/12"></div>
+                                            <div className="z-10 bg-gray-900 border-4 border-pink-500 w-8 h-8 rounded-full shadow-[0_0_15px_rgba(236,72,153,0.8)] relative">
+                                                <div className="absolute top-1/2 left-1/2 w-full h-1 bg-pink-500/50 transform -translate-y-1/2 -translate-x-1/2 z-[-1] animate-pulse"></div>
+                                            </div>
+                                            <div className={`w-5/12 ${i % 2 !== 0 ? 'text-right' : 'text-left'}`}>
+                                                <div className="bg-white/10 backdrop-blur-md p-6 rounded-2xl shadow-xl border border-white/5 hover:bg-white/20 transition-all duration-300 group transform hover:scale-105">
+                                                    <div className="relative overflow-hidden rounded-xl mb-4 h-auto min-h-[300px] border border-pink-500/30 cursor-pointer group-hover:shadow-[0_0_20px_rgba(236,72,153,0.6)] transition-shadow duration-300 bg-black/20" onClick={() => setSelectedImage(item.img)}>
+                                                        <img src={item.img} alt="Memory" className="parallax-img w-full h-full object-cover object-center transform transition-transform duration-500 group-hover:scale-105 will-change-transform" />
+                                                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                                                            <div className="bg-black/50 p-2 rounded-full border border-white/50 backdrop-blur-sm">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" /></svg>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <h3 className="text-xl font-bold text-pink-100 group-hover:text-pink-400 transition-colors mb-2">{item.text}</h3>
+                                                    <p className="text-pink-300 text-sm font-mono mb-3">{item.date}</p>
+                                                    <p className="text-gray-300 text-sm leading-relaxed">{item.desc}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+
+                                    {/* Video Memory Card - Centered Grand Finale */}
+                                    <div className="w-full max-w-4xl mx-auto mt-24 mb-16">
+                                        <div className="relative z-10">
+                                            <div className="absolute inset-0 bg-pink-500 blur-[100px] opacity-20 rounded-full"></div>
+                                            <div className="bg-white/10 backdrop-blur-xl p-8 rounded-[40px] shadow-2xl border border-white/10 text-center transform hover:scale-[1.01] transition-all duration-500">
+
+                                                <h3 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-200 to-rose-300 mb-6 font-script">لحظاتنا الحلوة لايف 🎥💖</h3>
+
+                                                <div className="relative overflow-hidden rounded-3xl mb-6 shadow-2xl border border-white/20 bg-black group cursor-pointer" onClick={() => setIsVideoModalOpen(true)}>
+                                                    <div className="absolute inset-0 flex items-center justify-center z-20 bg-black/30 group-hover:bg-black/10 transition-all">
+                                                        <div className="bg-white/20 backdrop-blur-md p-4 rounded-full border border-white/50 shadow-lg transform group-hover:scale-110 transition-transform">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" className="w-12 h-12 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
+                                                        </div>
+                                                    </div>
+                                                    <video className="w-full aspect-video object-cover opacity-80 group-hover:opacity-100 transition-opacity" muted playsInline>
+                                                        <source src="./video3.mp4" type="video/mp4" />
+                                                    </video>
+                                                </div>
+
+                                                <p className="text-pink-200 text-lg font-light leading-relaxed max-w-2xl mx-auto">
+                                                    "كل ثانية في الفيديو ده بتفكرني بيك وبحبنا.. ربنا يخليكي ليا يا أغلى حاجة في حياتي."
+                                                </p>
+                                                <div className="mt-4 text-sm text-pink-400/70 font-mono">ڤلانيتاين 2026</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </section>
+
+                            {/* Sea Message Envelope Section */}
+                            <section id="sea-message" className="py-24 px-4 text-center relative z-10 overflow-hidden min-h-[50vh] flex items-center justify-center">
+                                {/* Sea Background */}
+                                <div className="absolute inset-0 bg-gradient-to-b from-blue-900 via-blue-700 to-blue-500 z-0"></div>
+                                <div className="absolute inset-0 opacity-30 z-0" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 1440 320\'%3E%3Cpath fill=\'%23ffffff\' fill-opacity=\'1\' d=\'M0,64L48,80C96,96,192,128,288,128C384,128,480,96,576,106.7C672,117,768,171,864,176C960,181,1056,139,1152,122.7C1248,107,1344,117,1392,122.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z\'%3E%3C/path%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'bottom' }}></div>
+
+                                <div className="relative z-10 max-w-2xl mx-auto">
+                                    {!isSeaMessageOpen ? (
+                                        <div className="cursor-pointer group transform hover:scale-105 transition-transform duration-500" onClick={() => setIsSeaMessageOpen(true)}>
+                                            <div className="bg-white/10 backdrop-blur-md p-8 rounded-3xl border border-white/20 shadow-2xl relative overflow-hidden">
+                                                <div className="absolute inset-0 bg-blue-400/20 blur-xl group-hover:bg-blue-400/30 transition-colors"></div>
+                                                <div className="text-8xl mb-4 animate-bounce">💌</div>
+                                                <h3 className="text-2xl font-bold text-white mb-2">رسالة البحر</h3>
+                                                <p className="text-blue-100/80 text-sm">اضغط لفتح الرسالة 👆🏻</p>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="bg-white/90 backdrop-blur-xl p-10 rounded-3xl shadow-2xl border border-blue-200 animate-scaleIn relative">
+                                            <button onClick={(e) => { e.stopPropagation(); setIsSeaMessageOpen(false); }} className="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition-colors">
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                                            </button>
+                                            <h2 className="text-3xl font-bold text-blue-600 mb-6 font-script">رسالة البحر 🌊💙</h2>
+                                            <p className="text-xl md:text-2xl text-gray-700 font-medium leading-relaxed font-handwriting">
+                                                "مكانا المفضل هو البحر عشان احنا عارفين ان حبنا زيو مليان اسرار"
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+                            </section>
+
+
+                            {/* Reasons Why Section */}
+                            <section id="reasons" className="py-24 px-4 relative z-10">
+                                <h2 className="text-4xl font-bold text-center mb-16 text-pink-500">ليه بحبك؟ 🤔❤️</h2>
+                                <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                                    {[
+                                        { title: "حنيتك", desc: "أحن قلب في الدنيا، بتمسح دمعتي قبل ما تنزل." },
+                                        { title: "أمانك", desc: "معاك بحس إني مسنودة على جبل، ولا حاجة تقدر تكسرني." },
+                                        { title: "ضحكتك", desc: "لما بتضحك الدنيا كلها بتضحكلي، هي علاجي ودوائي." },
+                                        { title: "قلبك الأبيض", desc: "أنقى وأطيب قلب، بيسامح ويحب بصدق." },
+                                        { title: "عيونك", desc: "بشوف فيهم مستقبلي وبيتي واولادي وكل دنيتي." },
+                                        { title: "وجودك", desc: "كفاية بس إنك موجودة، ده بيخلي الحياة ليها طعم ولون." }
+                                    ].map((card, i) => (
+                                        <div key={i} className="bg-white/5 p-8 rounded-3xl shadow-xl border border-white/5 hover:-translate-y-2 hover:bg-white/10 transition-all duration-300 group backdrop-blur-sm">
+                                            <div className="w-12 h-12 bg-pink-900/50 rounded-full flex items-center justify-center mb-6 group-hover:bg-pink-600 transition-colors border border-pink-500/30">
+                                                <Heart className="w-6 h-6 text-pink-400 group-hover:text-white transition-colors" />
+                                            </div>
+                                            <h3 className="text-2xl font-bold text-pink-100 mb-3">{card.title}</h3>
+                                            <p className="text-gray-400 leading-relaxed">{card.desc}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </section>
+
+
+
+                            {/* Counter 1: First Sight */}
+                            <section className="py-20 px-4 text-center">
+                                <h2 className="text-4xl font-bold mb-10 text-gray-800">اول شعلة حب ف قلبنا (25/8/2025)</h2>
+                                <div className="grid grid-cols-2 md:grid-cols-6 gap-4 max-w-5xl mx-auto">
+                                    <TimeBox label="سنين" value={timeSinceFirstSight.years} />
+                                    <TimeBox label="شهور" value={timeSinceFirstSight.months} />
+                                    <TimeBox label="أيام" value={timeSinceFirstSight.days} />
+                                    <TimeBox label="ساعات" value={timeSinceFirstSight.hours} />
+                                    <TimeBox label="دقائق" value={timeSinceFirstSight.minutes} />
+                                    <TimeBox label="ثواني" value={timeSinceFirstSight.seconds} />
+                                </div>
+                            </section>
+
+                            <footer className="py-16 text-center bg-white/80 backdrop-blur-md border-t border-pink-100">
+                                <p className="text-2xl font-script text-gray-600 mb-8">For the rest of our life ❤</p>
+                                <button onClick={() => setShowFinalScene(true)}
+                                    className="bg-gray-900 text-white px-8 py-3 rounded-full text-sm hover:bg-black transition-colors shadow-lg tracking-widest uppercase font-bold">
+                                    The Final Scene
+                                </button>
+                            </footer>
+                            {/* Video Modal */}
+                            {isVideoModalOpen && (
+                                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md animate-fadeIn" onClick={() => { setIsVideoModalOpen(false); if (audioRef.current && isLogged) audioRef.current.play(); }}>
+                                    <div className="absolute top-4 right-4 z-50">
+                                        <button onClick={(e) => { e.stopPropagation(); setIsVideoModalOpen(false); if (audioRef.current && isLogged) audioRef.current.play(); }} className="p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors">
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                                        </button>
+                                    </div>
+                                    <div className="w-full h-full max-w-7xl max-h-screen p-4 flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
+                                        <video className="w-full h-full object-contain rounded-xl shadow-2xl" id="modalVideo" controls autoPlay playsInline
+                                            onPlay={() => { if (audioRef.current) audioRef.current.pause(); }}
+                                            onPause={() => { if (audioRef.current && isLogged) audioRef.current.play(); }}
+                                            onEnded={() => { setIsVideoModalOpen(false); if (audioRef.current && isLogged) audioRef.current.play(); }}
+                                        >
+                                            <source src="./video3.mp4" type="video/mp4" />
+                                            Your browser does not support the video tag.
+                                        </video>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Image Modal for Gallery */}
+                            {selectedImage && (
+                                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-4" onClick={() => setSelectedImage(null)}>
+                                    <img src={selectedImage} alt="Full View" className="max-w-full max-h-[90vh] rounded-xl shadow-2xl animate-scaleIn" />
+                                    <button className="absolute top-4 right-4 text-white text-4xl hover:text-pink-500 transition-colors">&times;</button>
+                                </div>
+                            )}
+                        </div >
+                    )
+                    }
+                </div >
+            );
+        }
+
+        function TimeBox({ label, value }) {
+            return (
+                <div className="bg-white p-6 rounded-2xl shadow-lg border border-pink-100 flex flex-col items-center justify-center aspect-square transform hover:scale-105 transition-transform duration-300">
+                    <span className="text-4xl font-bold text-pink-500 mb-2">{value || 0}</span>
+                    <span className="text-gray-400 text-sm font-medium">{label}</span>
+                </div>
+            );
+        }
+
+        function FinalSceneComponent({ onClose }) {
+            const [step, setStep] = useState(0);
+
+            useEffect(() => {
+                const timeouts = [];
+                const schedule = (ms, s) => timeouts.push(setTimeout(() => setStep(s), ms));
+
+                // Timeline matches the user's poetic flow
+                schedule(1000, 1);  // Title
+                schedule(4000, 2);  // Meaning 1
+                schedule(7000, 3);  // Meaning 2
+                schedule(10000, 4); // Meaning 3
+                schedule(13000, 5); // Stability
+                schedule(16000, 6); // Hard times
+                schedule(19000, 7); // Heart choice
+                schedule(22000, 8); // Always choice
+
+                // Grand Finale
+                schedule(26000, 10); // Clear layout
+                schedule(27000, 11); // Names
+                schedule(30000, 12); // Infinity
+                schedule(33000, 13); // English quote
+                schedule(38000, 14); // Whisper
+
+                return () => timeouts.forEach(clearTimeout);
+            }, []);
+
+            return (
+                <div className="fixed inset-0 z-[100] bg-black text-white flex flex-col items-center justify-center text-center p-6 overflow-hidden transition-colors duration-[2s]">
+                    {/* Side Controls */}
+                    <button onClick={onClose} className="fixed top-6 right-6 z-[110] bg-white/10 backdrop-blur-md border border-white/20 text-white p-3 rounded-full hover:bg-white/30 transition-all group" title="خروج">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+
+                    {/* Background Stars */}
+                    <div className="absolute inset-0 pointer-events-none opacity-40">
+                        {[...Array(30)].map((_, i) => (
+                            <div key={i} className="absolute bg-white rounded-full animate-pulse"
+                                style={{
+                                    width: Math.random() * 3 + 'px',
+                                    height: Math.random() * 3 + 'px',
+                                    top: Math.random() * 100 + '%',
+                                    left: Math.random() * 100 + '%',
+                                    animationDuration: Math.random() * 3 + 2 + 's'
+                                }}></div>
+                        ))}
+                    </div>
+
+                    <div className="relative z-10 max-w-4xl w-full flex flex-col items-center justify-center min-h-[60vh]">
+                        {step === 1 && (
+                            <h1 className="text-4xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-500 animate-slide-up leading-tight">
+                                ولو كان في عمر تاني…<br />هختارك برضه
+                            </h1>
+                        )}
+
+                        {step >= 2 && step < 10 && (
+                            <div className="mt-12 space-y-8">
+                                {step >= 2 && <p className="text-2xl text-gray-300 animate-fade-in">مش مجرد شخص دخل حياتي… <span className="text-pink-400 font-bold block mt-2 text-3xl">أنتي الحياة نفسها.</span></p>}
+                                {step >= 3 && <p className="text-2xl text-gray-300 animate-fade-in mt-8">مش مجرد حب… <span className="text-rose-400 font-bold block mt-2 text-3xl">أنتي الأمان، والونس، والبيت.</span></p>}
+                                {step >= 5 && <div className="h-px w-24 bg-gray-800 mx-auto my-8 animate-fade-in"></div>}
+                                {step >= 6 && <p className="text-xl text-gray-500 italic animate-fade-in">"لو الأيام اتشقلبت... ولو الدنيا وقفت ضدنا"</p>}
+                                {step >= 7 && <p className="text-4xl font-bold text-white mt-6 animate-slide-up">أنا ثابت…</p>}
+                                {step >= 8 && <p className="text-2xl text-pink-300 mt-4 animate-fade-in">علشان اخترتك بقلب كامل.</p>}
+                            </div>
+                        )}
+
+                        {step >= 11 && (
+                            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black animate-fade-in">
+                                <h1 className="text-7xl md:text-9xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-pink-500 via-red-500 to-purple-600 animate-pulse-slow mb-8">
+                                    محمد <span className="text-white mx-4">&amp;</span> روميثاء
+                                </h1>
+
+                                {step >= 12 && (
+                                    <div className="flex items-center gap-4 text-3xl text-gray-400 animate-fade-in font-light tracking-wide">
+                                        <span>إلى ما لا نهاية</span>
+                                        <span className="text-5xl text-pink-500 animate-spin-slow">∞</span>
+                                    </div>
+                                )}
+
+                                {step >= 13 && (
+                                    <p className="mt-12 text-2xl font-script text-white/60 animate-slide-up">For the rest of our life.</p>
+                                )}
+                            </div>
+                        )}
+
+                        {step >= 14 && (
+                            <div className="fixed bottom-6 right-6 z-[110] animate-fade-in flex flex-col items-end gap-2">
+                                <p className="text-xs text-gray-500 mb-2 mr-2">شكراً إنك جيتي حياتي…</p>
+                                <button onClick={onClose} className="bg-white/10 backdrop-blur-md border border-white/20 text-white px-6 py-3 rounded-full hover:bg-white hover:text-black transition-all flex items-center gap-2 group">
+                                    <span>الرجوع للرئيسية</span>
+                                    <span className="group-hover:-translate-x-1 transition-transform">🏠</span>
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById("root"));
+        root.render(<LoveWebsite />);
+    </script>
+</body>
+
+</html>

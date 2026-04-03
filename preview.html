@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mariam & Mohanad - Preview</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="importmap">
+        {
+            "imports": {
+                "react": "https://esm.sh/react@18.2.0",
+                "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+                "framer-motion": "https://esm.sh/framer-motion@10.16.4",
+                "lucide-react": "https://esm.sh/lucide-react@0.292.0"
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="root"></div>
+
+    <script type="module">
+        import React, { useState, useEffect } from "react";
+        import { createRoot } from "react-dom/client";
+        import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
+        import { Lock, Heart, Stars, Music } from "lucide-react";
+
+        function LoveWebsite() {
+            const [isLogged, setIsLogged] = useState(false);
+            const [day, setDay] = useState("");
+            const [month, setMonth] = useState("");
+            const [showLetter, setShowLetter] = useState(false);
+            const [showSecret, setShowSecret] = useState(false);
+            const [showFinalScene, setShowFinalScene] = useState(false);
+            const [timeTogether, setTimeTogether] = useState({});
+            const [isPlaying, setIsPlaying] = useState(false);
+            const audioRef = React.useRef(null);
+
+            const loveStartDate = new Date("2025-09-23T00:00:00");
+            const { scrollYProgress } = useScroll();
+            const scaleHero = useTransform(scrollYProgress, [0, 0.3], [1, 0.8]);
+
+            useEffect(() => {
+                const interval = setInterval(() => {
+                    const now = new Date();
+                    const diff = now - loveStartDate;
+
+                    const totalDays = Math.floor(diff / (1000 * 60 * 60 * 24));
+                    const years = Math.floor(totalDays / 365);
+                    const months = Math.floor((totalDays % 365) / 30);
+                    const days = totalDays % 30;
+                    const hours = Math.floor(diff / (1000 * 60 * 60)) % 24;
+                    const minutes = Math.floor(diff / (1000 * 60)) % 60;
+                    const seconds = Math.floor(diff / 1000) % 60;
+
+                    setTimeTogether({ years, months, days, hours, minutes, seconds });
+                }, 1000);
+
+                return () => clearInterval(interval);
+            }, []);
+
+            const handleLogin = () => {
+                if (day === "21" && month === "9") {
+                    setIsLogged(true);
+                    if (audioRef.current) {
+                        audioRef.current.play().catch(e => console.log("Audio play failed:", e));
+                        setIsPlaying(true);
+                    }
+                    setTimeout(() => setShowLetter(true), 1200);
+                } else {
+                    alert("جربوا تاريخكم المميز");
+                }
+            };
+
+            const triggerSecret = () => {
+                setShowSecret(true);
+                setTimeout(() => setShowSecret(false), 2000);
+            };
+
+            if (!isLogged) {
+                return (
+                    React.createElement("div", {
+                        className: "min-h-screen flex items-center justify-center bg-cover bg-center",
+                        style: { backgroundImage: "url('https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=2070&auto=format&fit=crop')" } // Fallback image
+                    },
+                        React.createElement("div", { className: "bg-black/70 p-10 rounded-3xl text-center text-white" },
+                            React.createElement(Lock, { className: "mx-auto mb-4", size: 40 }),
+                            React.createElement("h1", { className: "text-3xl font-bold mb-6" }, "دخول خاص"),
+                            React.createElement("div", { className: "flex gap-4 justify-center mb-6" },
+                                React.createElement("input", { type: "password", placeholder: "21", value: day, onChange: (e) => setDay(e.target.value), className: "w-20 p-3 rounded-xl text-black text-center" }),
+                                React.createElement("input", { type: "password", placeholder: "9", value: month, onChange: (e) => setMonth(e.target.value), className: "w-20 p-3 rounded-xl text-black text-center" })
+                            ),
+                            React.createElement("button", { onClick: handleLogin, className: "bg-pink-500 px-8 py-3 rounded-2xl" }, "دخول")
+                        )
+                    )
+                );
+            }
+
+            return (
+                React.createElement("div", { className: "bg-gradient-to-b from-rose-100 via-pink-200 to-rose-300 text-gray-800 overflow-hidden relative" },
+                    React.createElement("audio", { ref: audioRef, src: "./music.mp4", loop: true }),
+
+                    React.createElement("button", {
+                        onClick: () => {
+                            if (isPlaying) audioRef.current.pause();
+                            else audioRef.current.play();
+                            setIsPlaying(!isPlaying);
+                        },
+                        className: `fixed top-4 left-4 z-50 p-3 rounded-full shadow-lg text-pink-600 hover:bg-white transition-all duration-300 ${isPlaying ? "animate-spin" : "bg-white/80"}`
+                    },
+                        React.createElement(Music, { size: 24 })
+                    ),
+
+                    /* Secret Popup */
+                    React.createElement(AnimatePresence, null,
+                        showSecret && (
+                            React.createElement(motion.div, {
+                                initial: { opacity: 0, scale: 0.5 },
+                                animate: { opacity: 1, scale: 1 },
+                                exit: { opacity: 0 },
+                                className: "fixed inset-0 flex items-center justify-center bg-black/50 z-50"
+                            },
+                                React.createElement("div", { className: "bg-white px-16 py-10 rounded-3xl text-4xl font-bold text-pink-600 shadow-2xl" }, "بحبك ❤")
+                            )
+                        )
+                    ),
+
+                    /* Final Scene Overlay */
+                    React.createElement(AnimatePresence, null,
+                        showFinalScene && (
+                            React.createElement(FinalSceneComponent, { onClose: () => setShowFinalScene(false) })
+                        )
+                    ),
+
+                    /* Hero Cinematic */
+                    React.createElement(motion.section, { style: { scale: scaleHero }, className: "text-center py-32" },
+                        React.createElement("h1", { className: "text-6xl font-extrabold mb-6" }, "مريم ❤ مهند"),
+                        React.createElement("p", { className: "text-2xl" }, "قصة حب مكتوبة للابد"),
+                        React.createElement("button", {
+                            onClick: triggerSecret,
+                            className: "mt-10 bg-gradient-to-r from-pink-500 to-rose-500 text-white px-8 py-3 rounded-full shadow-xl"
+                        }, "زر المفاجأة")
+                    ),
+
+                    /* Timeline Memories */
+                    React.createElement("section", { className: "py-24 bg-white/70" },
+                        React.createElement("h2", { className: "text-4xl font-bold text-center mb-16" }, "خط ذكرياتنا"),
+                        React.createElement("div", { className: "relative max-w-4xl mx-auto" },
+                            React.createElement("div", { className: "absolute left-1/2 top-0 w-1 bg-pink-400 h-full" }),
+                            [
+                                "أول تعارف 13/9/2025",
+                                "أول ضحكة سوا",
+                                "أول خروجة",
+                                "الاعتراف بالحب 23/9/2025",
+                            ].map((item, index) => (
+                                React.createElement(motion.div, {
+                                    key: index,
+                                    initial: { opacity: 0, x: index % 2 === 0 ? -100 : 100 },
+                                    whileInView: { opacity: 1, x: 0 },
+                                    transition: { duration: 0.8 },
+                                    className: `mb-16 flex ${index % 2 === 0 ? "justify-start" : "justify-end"}`
+                                },
+                                    React.createElement("div", { className: "bg-pink-500 text-white p-6 rounded-2xl w-80 shadow-xl" }, item)
+                                )
+                            ))
+                        )
+                    ),
+
+                    /* Luxury Gallery */
+                    React.createElement("section", { className: "py-24 text-center" },
+                        React.createElement("h2", { className: "text-4xl font-bold mb-16" }, "صورنا"),
+                        React.createElement("div", { className: "grid md:grid-cols-3 gap-10 max-w-6xl mx-auto" },
+                            [1, 2, 3].map((num) => (
+                                React.createElement(motion.div, {
+                                    key: num,
+                                    whileHover: { scale: 1.05 },
+                                    className: "p-2 bg-gradient-to-r from-pink-400 to-rose-500 rounded-3xl shadow-2xl"
+                                },
+                                    React.createElement("div", { className: "bg-white h-72 rounded-2xl flex items-center justify-center text-xl" }, `صورة ${num}`)
+                                )
+                            ))
+                        )
+                    ),
+
+                    /* Counter */
+                    React.createElement("section", { className: "py-24 bg-white/70 text-center" },
+                        React.createElement("h2", { className: "text-3xl font-bold mb-10" }, "مدة حبنا"),
+                        React.createElement("div", { className: "grid grid-cols-2 md:grid-cols-6 gap-6 max-w-4xl mx-auto" },
+                            React.createElement(TimeBox, { label: "سنين", value: timeTogether.years }),
+                            React.createElement(TimeBox, { label: "شهور", value: timeTogether.months }),
+                            React.createElement(TimeBox, { label: "أيام", value: timeTogether.days }),
+                            React.createElement(TimeBox, { label: "ساعات", value: timeTogether.hours }),
+                            React.createElement(TimeBox, { label: "دقائق", value: timeTogether.minutes }),
+                            React.createElement(TimeBox, { label: "ثواني", value: timeTogether.seconds })
+                        )
+                    ),
+
+                    React.createElement("footer", { className: "text-center py-10 text-lg flex flex-col items-center gap-4" },
+                        React.createElement("p", null, "For the rest of our life ❤"),
+                        React.createElement("button", {
+                            onClick: () => setShowFinalScene(true),
+                            className: "bg-purple-600 text-white px-6 py-2 rounded-full text-sm hover:bg-purple-700 transition"
+                        }, "النهاية")
+                    )
+                )
+            );
+        }
+
+        function TimeBox({ label, value }) {
+            return (
+                React.createElement("div", { className: "bg-pink-500 text-white p-5 rounded-2xl shadow-xl" },
+                    React.createElement("div", { className: "text-2xl font-bold" }, value || 0),
+                    React.createElement("div", { className: "text-sm" }, label)
+                )
+            );
+        }
+
+        function FinalSceneComponent({ onClose }) {
+            const [step, setStep] = useState(0);
+
+            useEffect(() => {
+                const timeouts = [];
+                timeouts.push(setTimeout(() => setStep(1), 500));
+                timeouts.push(setTimeout(() => setStep(2), 3500));
+                timeouts.push(setTimeout(() => setStep(3), 6500));
+                timeouts.push(setTimeout(() => setStep(4), 9500));
+                timeouts.push(setTimeout(() => setStep(5), 12500));
+                timeouts.push(setTimeout(() => setStep(6), 16000));
+                timeouts.push(setTimeout(() => setStep(7), 19000));
+                timeouts.push(setTimeout(() => setStep(8), 22000));
+                timeouts.push(setTimeout(() => setStep(9), 24000));
+                timeouts.push(setTimeout(() => setStep(10), 28000));
+                timeouts.push(setTimeout(() => setStep(11), 32000));
+
+                timeouts.push(setTimeout(() => setStep(12), 36000));
+                timeouts.push(setTimeout(() => setStep(13), 37000));
+                timeouts.push(setTimeout(() => setStep(14), 40000));
+
+                timeouts.push(setTimeout(() => setStep(15), 45000));
+
+                return () => timeouts.forEach(clearTimeout);
+            }, []);
+
+            return (
+                React.createElement(motion.div, {
+                    initial: { opacity: 0 },
+                    animate: { opacity: 1 },
+                    exit: { opacity: 0 },
+                    className: "fixed inset-0 z-[100] bg-black/90 flex flex-col items-center justify-center text-center p-8 overflow-hidden"
+                },
+                    React.createElement("button", {
+                        onClick: onClose,
+                        className: "absolute top-4 right-4 text-white/30 hover:text-white text-sm"
+                    }, "خروج"),
+
+                    /* Floating Background Particles */
+                    React.createElement("div", { className: "absolute inset-0 pointer-events-none" },
+                        [...Array(20)].map((_, i) => (
+                            React.createElement(motion.div, {
+                                key: i,
+                                initial: {
+                                    opacity: 0,
+                                    x: Math.random() * window.innerWidth,
+                                    y: window.innerHeight
+                                },
+                                animate: {
+                                    opacity: [0, 1, 0],
+                                    y: -100,
+                                    x: Math.random() * window.innerWidth
+                                },
+                                transition: {
+                                    duration: 5 + Math.random() * 5,
+                                    repeat: Infinity,
+                                    delay: Math.random() * 5
+                                },
+                                className: "absolute text-pink-500/30"
+                            },
+                                i % 2 === 0 ? React.createElement(Heart, { size: 10 + Math.random() * 20 }) : React.createElement(Stars, { size: 10 + Math.random() * 20 })
+                            )
+                        ))
+                    ),
+
+                    React.createElement("div", { className: "relative z-10 max-w-3xl w-full flex flex-col items-center justify-center min-h-[50vh]" },
+                        React.createElement(AnimatePresence, { mode: "wait" },
+                            step === 1 && (
+                                React.createElement(motion.h2, {
+                                    key: "step1",
+                                    initial: { opacity: 0, y: 20 },
+                                    animate: { opacity: 1, y: 0 },
+                                    exit: { opacity: 0, y: -20 },
+                                    transition: { duration: 1 },
+                                    className: "text-4xl md:text-6xl font-bold text-pink-500 mb-8"
+                                }, "ولو كان في عمر تاني… هختارك برضه")
+                            ),
+
+                            step >= 2 && step < 12 && (
+                                React.createElement(motion.div, { key: "sequence-text", className: "space-y-6" },
+                                    step >= 2 && React.createElement(motion.p, { initial: { opacity: 0, x: -20 }, animate: { opacity: 1, x: 0 }, className: "text-2xl text-white/90" }, "مش مجرد شخص دخل حياتي…"),
+                                    step >= 3 && React.createElement(motion.p, { initial: { opacity: 0, x: 20 }, animate: { opacity: 1, x: 0 }, className: "text-3xl font-semibold text-pink-400" }, "أنت الحياة نفسها."),
+                                    step >= 4 && React.createElement(motion.p, { initial: { opacity: 0, y: 10 }, animate: { opacity: 1, y: 0 }, className: "text-2xl text-white/90 mt-4" }, "مش مجرد حب…"),
+                                    step >= 5 && React.createElement(motion.p, { initial: { opacity: 0, scale: 0.9 }, animate: { opacity: 1, scale: 1 }, className: "text-3xl font-semibold text-rose-400" }, "أنت الأمان، والونس، والبيت."),
+                                    step >= 6 && React.createElement(motion.p, { initial: { opacity: 0 }, animate: { opacity: 1 }, className: "text-xl text-gray-300 mt-6" }, "لو الأيام اتشقلبت... ولو الدنيا وقفت ضدنا"),
+                                    step >= 8 && React.createElement(motion.p, { initial: { opacity: 0, scale: 1.5 }, animate: { opacity: 1, scale: 1 }, className: "text-4xl font-bold text-white mt-4" }, "أنا ثابتة…"),
+                                    step >= 9 && React.createElement(motion.p, { initial: { opacity: 0 }, animate: { opacity: 1 }, className: "text-2xl text-pink-300" }, "علشان اخترتك بقلب كامل."),
+                                    step >= 10 && React.createElement(motion.div, { initial: { opacity: 0 }, animate: { opacity: 1 }, className: "mt-8 text-xl text-white/80" },
+                                        React.createElement("p", null, "ومش باختارك كل يوم بس…"),
+                                        step >= 11 && React.createElement("p", { className: "text-3xl text-pink-500 font-bold mt-2" }, "أنا باختارك كل لحظة.")
+                                    )
+                                )
+                            ),
+
+                            step >= 13 && (
+                                React.createElement(motion.div, { key: "grand-finale", className: "flex flex-col items-center" },
+                                    React.createElement(motion.h1, {
+                                        initial: { opacity: 0, scale: 0.5 },
+                                        animate: { opacity: 1, scale: 1 },
+                                        transition: { duration: 1.5, type: "spring" },
+                                        className: "text-6xl md:text-8xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-rose-600 mb-8"
+                                    }, "مهند ❤️ مريم"),
+
+                                    React.createElement(motion.div, {
+                                        initial: { opacity: 0 },
+                                        animate: { opacity: 1 },
+                                        transition: { delay: 1, duration: 2 },
+                                        className: "text-2xl text-white flex items-center gap-2"
+                                    },
+                                        React.createElement("span", null, "إلى ما لا نهاية"),
+                                        React.createElement(motion.span, {
+                                            animate: { rotate: 360 },
+                                            transition: { duration: 10, repeat: Infinity, ease: "linear" }
+                                        }, "♾️")
+                                    ),
+
+                                    step >= 14 && React.createElement(motion.p, {
+                                        initial: { opacity: 0, y: 20 },
+                                        animate: { opacity: 1, y: 0 },
+                                        transition: { duration: 1 },
+                                        className: "text-xl text-gray-400 mt-4 font-serif italic"
+                                    }, "For the rest of our life.")
+                                )
+                            )
+                        )
+                    ),
+
+                    step >= 15 && (
+                        React.createElement(motion.div, {
+                            initial: { opacity: 0 },
+                            animate: { opacity: 1 },
+                            transition: { duration: 2 },
+                            className: "absolute bottom-10 text-sm text-gray-500"
+                        }, "شكراً إنك جيت حياتي… وغيرتها للأبد.")
+                    )
+                )
+            );
+        }
+
+        const root = createRoot(document.getElementById("root"));
+        root.render(React.createElement(LoveWebsite));
+    </script>
+</body>
+
+</html>
